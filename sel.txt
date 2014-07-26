@@ -1,0 +1,16 @@
+SEL - conditional branch
+
+Synopsis: pop an integer off the data stack;
+          test if it is non-zero;
+          push the return address to the control stack;
+          jump to the true address or to the false address
+Syntax:  SEL $t $f
+Example: SEL 335 346  ; absolute instruction addresses
+Effect:
+  $x,%s := POP(%s)
+  if TAG($x) != TAG_INT then FAULT(TAG_MISMATCH)
+  %d := PUSH(SET_TAG(TAG_JOIN,%c+1),%d)   ; save the return address
+  if $x == 0 then
+    %c := $f
+  else
+    %c := $t

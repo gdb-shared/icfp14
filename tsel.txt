@@ -1,0 +1,16 @@
+TSEL - tail-call conditional branch
+
+Synopsis: pop an integer off the data stack;
+          test if it is non-zero;
+          jump to the true address or to the false address
+Syntax:  TSEL $t $f
+Example: TSEL 335 346  ; absolute instruction addresses
+Effect:
+  $x,%s := POP(%s)
+  if TAG($x) != TAG_INT then FAULT(TAG_MISMATCH)
+  if $x == 0 then
+    %c := $f
+  else
+    %c := $t
+Notes:
+  This instruction is the same as SEL but it does not push a return address
