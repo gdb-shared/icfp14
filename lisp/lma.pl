@@ -29,6 +29,10 @@ sub main {
         $statement =~ s{(LDF\s+)([a-z]\w+)}{
             $1 . $program->[1]{$2} . " ; >>---- $2 ---->> "
             // die "ERROR: Undefined label to LDF: $1\n"}ie;
+        $statement =~ s{((?:LDF|SEL)\s+)([a-z]\w+)\s+([a-z]\w+)}{
+            $1 . $program->[1]{$2} . " " . $program->[1]{$3} . 
+            " ; >>---- $2 ---->> "
+            // die "ERROR: Undefined label to LDF: $1\n"}ie;
         print $statement, "\n";
     }
 }

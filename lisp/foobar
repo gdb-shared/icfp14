@@ -56,47 +56,53 @@ my %prim = qw(
 my %code;
 my $cid;
 
+sub frame_lookup {
+    my ($name, $f) = @_;
+    my ($n, $i) = (0, 0);
+    return ($n, $i);
+}
+
 sub compile {
-    my ($x, $e) = @_;
+    my ($x, $f) = @_;
     if (not ref $x) {
         if (looks_like_number($x)) {
             print "  LDC $x\n";
         } else {
             # TODO
-            my ($n, $i) = (0, 0);
+            my ($n, $i) = frame_lookup($x, $f);
             print "  LD $n $i\n";
         }
     } elsif ($x->[0] eq "begin") {
         for (my $i = 1; $i < @$x; ++$i) {
-            compile($x->[$i], $e);
+            compile($x->[$i], $f);
         }
     } elsif ($x->[0] eq "set!") {
-        compile($x->[2], $e);
+        compile($x->[2], $f);
         # TODO
         my ($n, $i) = (0, 0);
         print "  ST $n $i\n";
     } elsif ($x->[0] eq "define") {
     } elsif ($x->[0] eq "if") {
-        compile($x->[1], $e);
+        compile($x->[1], $f);
         # TODO
         my ($l1, $l2) = ("label1", "label2");
         print "  SEL $l1 $l2\n";
         print "label1:\n";
-        compile($x->[2], $e);
+        compile($x->[2], $f);
         print "  JOIN\n";
         print "label2:\n";
-        compile($x->[3], $e);
+        compile($x->[3], $f);
         print "  JOIN\n";
     } elsif ($prim{$x->[0]}) {
         my $f = $prim{$x->[0]};
         for (my $i = 1; $i < @$x; ++$i) {
-            compile($x->[$i], $e);
+            compile($x->[$i], $f);
         }
         print "  $f\n";
     } else {
         my $f = $x->[0];
         for (my $i = $#$x; $i > 0; --$i) {
-            compile($x->[$i], $e);
+            compile($x->[$i], $f);
         }
         print "  $f\n";
     }
