@@ -3,3 +3,5 @@ test:
 
 pac:
 	./lma.pl pac.lma
+pb:
+	./lma.pl pac.lma | pbcopy
