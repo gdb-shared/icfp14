@@ -104,8 +104,8 @@ def Compile(x, env=global_env, b=global_blocks):
     elif x[0] == 'if':             # (if test conseq alt)
         (_, test, conseq, alt) = x
         code = Compile(test)
-        l1 = b.Add(Compile(conseq))
-        l2 = b.Add(Compile(alt))
+        l1 = b.Add(Compile(conseq) + ["RTN"])
+        l2 = b.Add(Compile(alt) + ["RTN"])
         code.append("SEL %s %s" % (l1, l2))
         return code
     elif x[0] == 'set!':           # (set! var exp)
@@ -130,7 +130,7 @@ def Compile(x, env=global_env, b=global_blocks):
         code = []
         for exp in x[1:]:
             code.extend(Compile(exp, env))
-        code.append(x[0])
+        code.append(prim[x[0]])
         return code
     else:                          # (proc exp*)
         code = []
