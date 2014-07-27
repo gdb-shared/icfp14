@@ -45,6 +45,7 @@ class Blocks(object):
             f.write('  ' + line + '\n')
     def __init__(self):
         self.subs = dict()
+global_blocks = Blocks()
 def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
@@ -102,19 +103,19 @@ def Compile(x, env=global_env, b=global_blocks):
         raise RuntimeError("quote unimplmented")
     elif x[0] == 'if':             # (if test conseq alt)
         (_, test, conseq, alt) = x
-        code = compile(test)
-        l1 = b.Add(compile(conseq))
-        l2 = b.Add(compile(alt))
+        code = Compile(test)
+        l1 = b.Add(Compile(conseq))
+        l2 = b.Add(Compile(alt))
         code.append("SEL %s %s" % (l1, l2))
         return code
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
-        code = compile(exp)
+        code = Compile(exp)
         code.append("ST %d %d" % env.find(var)[var])
         return code
     elif x[0] == 'define':         # (define var exp)
         (_, var, exp) = x
-        code = compile(exp)
+        code = Compile(exp)
         code.append("ST %d %d" % frame_add(var, env))
         return code
     elif x[0] == 'lambda':         # (lambda (var*) exp)
@@ -146,7 +147,8 @@ def main(prog, f=""):
     else:
         prog = ['add', ['add', 1, 2], 3]
     pprint.pprint(prog)
-    Compile(prog)
+    global_blocks.AddMain(Compile(prog))
+    global_blocks.Print()
 
 if __name__=="__main__":
     main(*sys.argv)
