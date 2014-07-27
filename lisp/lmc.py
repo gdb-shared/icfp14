@@ -94,14 +94,10 @@ prim = {
     'cdr': 'CDR',
 }
 
-def frame_lookup(name, f):
-    n, i = (0, 0);
-    return (n, i);
-
 def Compile(x, env=global_env, b=global_blocks):
     "Evaluate an expression in an environment."
     if isa(x, Symbol):             # variable reference
-        return ["LD %d %d" % env.find(x)[x]]
+        return ["LD %d %d" % (0, env.find(x)[x])]
     elif not isa(x, list):         # constant literal
         return ["LDC %d" % x]
     elif x[0] == 'quote':          # (quote exp)
@@ -121,7 +117,8 @@ def Compile(x, env=global_env, b=global_blocks):
     elif x[0] == 'define':         # (define var exp)
         (_, var, exp) = x
         code = Compile(exp)
-        code.append("ST %d %d" % frame_add(var, env))
+        env[var] = len(env)
+        code.append("ST %d %d" % env[var])
         return code
     elif x[0] == 'lambda':         # (lambda (var*) exp)
         (_, vars, exp) = x
@@ -141,7 +138,7 @@ def Compile(x, env=global_env, b=global_blocks):
         code = []
         for exp in x[1:]:
             code.extend(Compile(exp, env))
-        code.append("LD %d %d" % frame_lookup(x[0], env))
+        code.append("LDF %d %d" % (0, env.find(x)[x]))
         code.append("AP %d" % (len(x)-1))
         return code
 
