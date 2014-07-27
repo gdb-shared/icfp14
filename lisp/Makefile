@@ -1,11 +1,11 @@
-test:
+test: syn
 	./lmc.py simple7.lisp
 
 pac:
 	./lma.pl pac.lma
 pb:
 	./lma.pl pac.lma | pbcopy
-suite:
+suite: 
 	./lmc.py simple.lisp
 	./lmc.py simple2.lisp
 	./lmc.py simple3.lisp
@@ -16,4 +16,6 @@ suite:
 t:
 	py.test test_lmc.py
 tall: suite t
+syn:
+	python -c "import lmc"
 .PHONY: t suite
