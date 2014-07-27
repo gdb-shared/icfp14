@@ -21,3 +21,22 @@ Lambda Man Quick Ref
     JOIN    - dpop i. c=i
     LDF f   - push CLOSURE(f. e)
     AP n    - pop f. e=newFrame(pop n values)
+
+
+Ghost Language
+--------------
+
+    (define f (lambda (x) (* x x)))
+    (defn f (x) (* x x))
+
+    if x:
+        y = 2
+    else:
+        y = 1
+
+    (define y (if (x) 2 1))
+
+    if("x",
+        set("y",1),
+        set("y",2))
+    fun(["x","y"],add("x","y"))
