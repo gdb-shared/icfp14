@@ -1,0 +1,52 @@
+(begin
+ (define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))
+ (cons (+ 1 (* 3 4)) (list (fact 10) 1))
+)
+
+
+(cons 1 0)
+
+  ldc 1
+  ldc 0
+  cons
+
+(car (cons 1 0))
+
+  ldc 1
+  ldc 0
+  cons
+  car
+
+(+ (+ 1 2) (+ 3 4))
+
+  ldc 4
+  ldc 3
+  add
+  ldc 2
+  ldc 1
+  add
+  add
+
+(cons 1 (cons 2 (cons 3 4)))
+
+  ldc 4
+  ldc 3
+  cons
+  ldc 2
+  cons
+  ldc 1
+  cons
+
+(if 1 42 0)
+
+  ldc 1
+  sel func0 func1
+  stop
+func0:
+  ldc 0
+  rtn
+func1:
+  ldc 42
+  rtc
+
+(begin (define a 1) (set! a 2) a)

@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my %code;
+my $cid;
+
+sub compile {
+    my ($e) = @_;
+    if (ref $e) {
+        my $f = $e->[0];
+        for (my $i = $#$e; $i > 0; --$i) {
+            compile($e->[$i]);
+        }
+        print "  $f\n";
+    } else {
+        print "  ldc $e\n";
+    }
+}
+
+sub main {
+    my $prog = [add => [add => 1, 2], 3];
+    use Data::Dumper;
+    warn Dumper $prog;
+    compile($prog);
+}
+
+main()
