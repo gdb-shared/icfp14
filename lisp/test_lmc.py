@@ -5,8 +5,13 @@ def testme():
     assert 1
 def test_Blocks():
     g = lmc.Blocks()
-    g.AddMain(['I am main'])
-    g.Add(['line1', 'line2'])
+    label = g.Add(['line1', 'line2'])
+    g.AddMain(['I am main ' + label])
     s = io.BytesIO()
-    g.Print(s)
-    #assert s.get() == ''
+    g.Print(s, with_linenos=False)
+    expected = '''\
+  I am main 1
+  line1
+  line2
+'''
+    assert s.getvalue() == expected

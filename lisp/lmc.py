@@ -32,7 +32,7 @@ class Blocks(object):
         return "${%s}" %label
     def AddMain(self, sub):
         self.main = sub
-    def Print(self, f=sys.stdout):
+    def Print(self, f=sys.stdout, with_linenos=True):
         linenos = dict()
         lines = list()
         lines.extend(self.main)
@@ -40,9 +40,13 @@ class Blocks(object):
             linenos[label] = len(lines)
             lines.extend(sub)
         Debug(pprint.pformat(linenos))
-        lines = [string.Template(line + "\t ; #%02d" %n).substitute(linenos)
-                for n, line in enumerate(lines)]
-        for line in lines:
+        newlines = list()
+        for n, line in enumerate(lines):
+            if with_linenos:
+                line += "\t ; #%02d" %n
+            myline = string.Template(line).substitute(linenos)
+            newlines.append(myline)
+        for line in newlines:
             f.write('  ' + line + '\n')
     def __init__(self):
         self.subs = dict()
