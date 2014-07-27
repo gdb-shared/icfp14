@@ -13,3 +13,7 @@ suite:
 	./lmc.py simple5.lisp
 	./lmc.py simple6.lisp
 	./lmc.py simple7.lisp
+t:
+	py.test test_lmc.py
+tall: suite t
+.PHONY: t suite

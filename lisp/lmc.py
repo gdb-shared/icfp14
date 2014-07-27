@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 from __future__ import print_function
 from __future__ import division
-import sys, pprint
+import sys, pprint, string
 
 def Print(s):
     print(s)
@@ -38,15 +38,28 @@ isa = isinstance
 
 #######################
 
-class Globals(object):
+def Debug(s):
+    sys.stderr.write(s + '\n')
+class Blocks(object):
+    def Add(self, sub):
+        label = 'LABEL%02d' %len(self.subs)
+        self.subs[label] = sub
+        return "${%s}" %label
+    def AddMain(self, sub):
+        self.main = sub
+    def Print(self, f=sys.stdout):
+        linenos = dict()
+        lines = list()
+        lines.extend(self.main)
+        for label, sub in self.subs.items():
+            linenos[label] = len(lines)
+            lines.extend(sub)
+        Debug(pprint.pformat(linenos))
+        lines = [string.Template(line).substitute(linenos) for line in lines]
+        for line in lines:
+            f.write('  ' + line + '\n')
     def __init__(self):
         self.subs = dict()
-    def Add(self, sub):
-        label = 'LABEL%02d' %len(subs)
-        self.subs[label] = l
-        return label
-    def Print(self, s):
-        print(s)
 def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
@@ -150,4 +163,5 @@ def main(prog, f=""):
     pprint.pprint(prog)
     Compile(prog)
 
-main(*sys.argv)
+if __name__=="__main__":
+    main(*sys.argv)
