@@ -35,14 +35,18 @@ global_env = add_globals(Env())
 isa = isinstance
 
 #######################
+subs = dict()
+
+def Global(l):
+    label = 'LABEL%02d' %len(subs)
+    subs[label] = l
+    return label
 def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
-
 def tokenize(s):
     "Convert a string into a list of tokens."
     return s.replace('(',' ( ').replace(')',' ) ').split()
-
 def read_from(tokens):
     "Read an expression from a sequence of tokens."
     if len(tokens) == 0:
