@@ -1,25 +1,93 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use Scalar::Util qw(looks_like_number);
+
+sub parse {
+    my ($s) = @_;
+    # "Read a Scheme expression from a string."
+    return read_from(tokenize($s));
+}
+
+sub tokenize {
+    my ($s) = @_;
+    # "Convert a string into a list of tokens."
+    $s =~ s/([()])/ $1 /g;
+    return [split " ", $s];
+}
+
+sub read_from {
+    my ($tokens) = @_;
+    # "Read an expression from a sequence of tokens."
+    if (not @$tokens) {
+        die "ERROR: unexpected EOF while reading\n";
+    }
+    my $token = shift @$tokens;
+    if ($token eq "(") {
+        my @l;
+        while ($tokens->[0] ne ")") {
+            push @l, read_from($tokens);
+        }
+        shift @$tokens; # pop off ")"
+        return \@l;
+    } elsif ($token eq ")") {
+        die "ERROR: unexpected )\n";
+    } else {
+        return atom($token);
+    }
+}
+
+sub atom { return @_; }
 
 my %code;
 my $cid;
 
 sub compile {
-    my ($e) = @_;
-    if (ref $e) {
-        my $f = $e->[0];
-        for (my $i = $#$e; $i > 0; --$i) {
-            compile($e->[$i]);
+    my ($x, $e) = @_;
+    if (not ref $x) {
+        if (looks_like_number($x)) {
+            print "  ldc $x\n";
+        } else {
+            # TODO
+            my ($n, $i) = (0, 0);
+            print "  ld $n $i\n";
+        }
+    } elsif ($x->[0] eq "begin") {
+        for (my $i = 1; $i < @$x; ++$i) {
+            compile($x->[$i], $e);
+        }
+    } elsif ($x->[0] eq "set!") {
+        compile($x->[2], $e);
+        # TODO
+        my ($n, $i) = (0, 0);
+        print "  ST $n $i\n";
+    } elsif ($x->[0] eq "define") {
+    } elsif ($x->[0] eq "if") {
+        compile($x->[1], $e);
+        # TODO
+        my ($l1, $l2) = ("label1", "label2");
+        print "  SEL $l1 $l2\n";
+        print "label1:\n";
+        compile($x->[2], $e);
+        print "label2:\n";
+        compile($x->[3], $e);
+    } else {
+        my $f = $x->[0];
+        for (my $i = $#$x; $i > 0; --$i) {
+            compile($x->[$i], $e);
         }
         print "  $f\n";
-    } else {
-        print "  ldc $e\n";
     }
 }
 
 sub main {
-    my $prog = [add => [add => 1, 2], 3];
+    my $prog;
+    if (@ARGV) {
+        my $code = join "", <>;
+        $prog = parse($code);
+    } else {
+        $prog = [add => [add => 1, 2], 3];
+    }
     use Data::Dumper;
     warn Dumper $prog;
     compile($prog);
