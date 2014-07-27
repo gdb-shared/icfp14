@@ -14,8 +14,10 @@ step:
   LDC  1
   ADD
   LD   0 0      ; var s
+  LDC  8
+  DIV
   LD   0 0      ; var s
-  LDC  4
+  LDC  32
   DIV
   LDC  4
   MUL
