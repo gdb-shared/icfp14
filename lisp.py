@@ -23,10 +23,10 @@ def add_globals(env):
     env.update(vars(math)) # sin, sqrt, ...
     env.update(
      {'+':op.add, '-':op.sub, '*':op.mul, '/':op.div, 'not':op.not_,
-      '>':op.gt, '<':op.lt, '>=':op.ge, '<=':op.le, '=':op.eq, 
+      '>':op.gt, '<':op.lt, '>=':op.ge, '<=':op.le, '=':op.eq,
       'equal?':op.eq, 'eq?':op.is_, 'length':len, 'cons':lambda x,y:[x]+y,
-      'car':lambda x:x[0],'cdr':lambda x:x[1:], 'append':op.add,  
-      'list':lambda *x:list(x), 'list?': lambda x:isa(x,list), 
+      'car':lambda x:x[0],'cdr':lambda x:x[1:], 'append':op.add,
+      'list':lambda *x:list(x), 'list?': lambda x:isa(x,list),
       'null?':lambda x:x==[], 'symbol?':lambda x: isa(x, Symbol)})
     return env
 
@@ -41,7 +41,7 @@ def eval(x, env=global_env):
     if isa(x, Symbol):             # variable reference
         return env.find(x)[x]
     elif not isa(x, list):         # constant literal
-        return x                
+        return x
     elif x[0] == 'quote':          # (quote exp)
         (_, exp) = x
         return exp
