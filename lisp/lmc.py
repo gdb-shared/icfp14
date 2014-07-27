@@ -37,12 +37,16 @@ global_env = add_globals(Env())
 isa = isinstance
 
 #######################
-subs = dict()
 
-def Global(l):
-    label = 'LABEL%02d' %len(subs)
-    subs[label] = l
-    return label
+class Globals(object):
+    def __init__(self):
+        self.subs = dict()
+    def Add(self, sub):
+        label = 'LABEL%02d' %len(subs)
+        self.subs[label] = l
+        return label
+    def Print(self, s):
+        print(s)
 def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
