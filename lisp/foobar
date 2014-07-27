@@ -39,6 +39,20 @@ sub read_from {
 
 sub atom { return @_; }
 
+my %prim = qw(
+    + ADD
+    - SUB
+    * MUL
+    / DIV
+    = CEQ
+    > CGT
+    >= CGTE
+    atom ATOM
+    cons CONS
+    car CAR
+    cdr CDR
+);
+
 my %code;
 my $cid;
 
@@ -46,11 +60,11 @@ sub compile {
     my ($x, $e) = @_;
     if (not ref $x) {
         if (looks_like_number($x)) {
-            print "  ldc $x\n";
+            print "  LDC $x\n";
         } else {
             # TODO
             my ($n, $i) = (0, 0);
-            print "  ld $n $i\n";
+            print "  LD $n $i\n";
         }
     } elsif ($x->[0] eq "begin") {
         for (my $i = 1; $i < @$x; ++$i) {
@@ -69,8 +83,16 @@ sub compile {
         print "  SEL $l1 $l2\n";
         print "label1:\n";
         compile($x->[2], $e);
+        print "  JOIN\n";
         print "label2:\n";
         compile($x->[3], $e);
+        print "  JOIN\n";
+    } elsif ($prim{$x->[0]}) {
+        my $f = $prim{$x->[0]};
+        for (my $i = 1; $i < @$x; ++$i) {
+            compile($x->[$i], $e);
+        }
+        print "  $f\n";
     } else {
         my $f = $x->[0];
         for (my $i = $#$x; $i > 0; --$i) {
