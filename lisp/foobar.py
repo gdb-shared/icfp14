@@ -110,7 +110,7 @@ def Compile(x, env=global_env):
         Print("  JOIN")
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
-        Compile(exp, f)
+        Compile(exp, env)
         # TODO
         n, i = (0, 0)
         Print("  ST %s %s" %(n, i))
