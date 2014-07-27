@@ -1,13 +1,10 @@
-#!/usr/bin/python
-################ Lispy: Scheme Interpreter in Python
-
-## (c) Peter Norvig, 2010; See http://norvig.com/lispy.html
-
-################ Symbol, Env classes
-
+#!/usr/bin/env python2.7
+from __future__ import print_function
 from __future__ import division
-import sys
-import pprint
+import sys, pprint
+
+def Print(s):
+    print(s)
 
 Symbol = str
 
@@ -24,6 +21,8 @@ def add_globals(env):
     "Add some Scheme standard procedures to an environment."
     import math, operator as op
     env.update(vars(math)) # sin, sqrt, ...
+    return env
+    # TODO?
     env.update(
      {'+':op.add, '-':op.sub, '*':op.mul, '/':op.div, 'not':op.not_,
       '>':op.gt, '<':op.lt, '>=':op.ge, '<=':op.le, '=':op.eq,
@@ -37,79 +36,19 @@ global_env = add_globals(Env())
 
 isa = isinstance
 
-################ eval
+#######################
+subs = dict()
 
-def eval(x, env=global_env):
-    "Evaluate an expression in an environment."
-    if isa(x, Symbol):             # variable reference
-        return env.find(x)[x]
-    elif not isa(x, list):         # constant literal
-        return x
-    elif x[0] == 'quote':          # (quote exp)
-        (_, exp) = x
-        return exp
-    elif x[0] == 'if':             # (if test conseq alt)
-        (_, test, conseq, alt) = x
-        return eval((conseq if eval(test, env) else alt), env)
-    elif x[0] == 'set!':           # (set! var exp)
-        (_, var, exp) = x
-        env.find(var)[var] = eval(exp, env)
-    elif x[0] == 'define':         # (define var exp)
-        (_, var, exp) = x
-        env[var] = eval(exp, env)
-    elif x[0] == 'lambda':         # (lambda (var*) exp)
-        (_, vars, exp) = x
-        return lambda *args: eval(exp, Env(vars, args, env))
-    elif x[0] == 'begin':          # (begin exp*)
-        for exp in x[1:]:
-            val = eval(exp, env)
-        return val
-    else:                          # (proc exp*)
-        exps = [eval(exp, env) for exp in x]
-        proc = exps.pop(0)
-        return proc(*exps)
-
-################ parse, read, and user interaction
-
-def compile(x):
-    "Compile an expression to Lambda-Man ISA."
-    if isa(x, Symbol):             # variable reference
-        return x
-    elif not isa(x, list):         # constant literal
-        return x
-    elif x[0] == 'quote':          # (quote exp)
-        raise RuntimeError("quote unimplmented")
-    elif x[0] == 'if':             # (if test conseq alt)
-        (_, test, conseq, alt) = x
-        return eval((conseq if eval(test, env) else alt), env)
-    elif x[0] == 'set!':           # (set! var exp)
-        (_, var, exp) = x
-        env.find(var)[var] = eval(exp, env)
-    elif x[0] == 'define':         # (define var exp)
-        (_, var, exp) = x
-        env[var] = eval(exp, env)
-    elif x[0] == 'lambda':         # (lambda (var*) exp)
-        (_, vars, exp) = x
-        return lambda *args: eval(exp, Env(vars, args, env))
-    elif x[0] == 'begin':          # (begin exp*)
-        for exp in x[1:]:
-            val = eval(exp, env)
-        return val
-    else:                          # (proc exp*)
-        exps = [eval(exp, env) for exp in x]
-        proc = exps.pop(0)
-        return proc(*exps)
-
-def read(s):
+def Global(l):
+    label = 'LABEL%02d' %len(subs)
+    subs[label] = l
+    return label
+def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
-
-parse = read
-
 def tokenize(s):
     "Convert a string into a list of tokens."
     return s.replace('(',' ( ').replace(')',' ) ').split()
-
 def read_from(tokens):
     "Read an expression from a sequence of tokens."
     if len(tokens) == 0:
@@ -133,24 +72,78 @@ def atom(token):
         try: return float(token)
         except ValueError:
             return Symbol(token)
+prim = {
+    '+': 'ADD',
+    '-': 'SUB',
+    '*': 'MUL',
+    '/': 'DIV',
+    '=': 'CEQ',
+    '>': 'CGT',
+    '>=': 'CGTE',
+    'atom': 'ATOM',
+    'cons': 'CONS',
+    'car': 'CAR',
+    'cdr': 'CDR',
+}
 
-def to_string(exp):
-    "Convert a Python object back into a Lisp-readable string."
-    return '('+' '.join(map(to_string, exp))+')' if isa(exp, list) else str(exp)
+def frame_lookup(name, f):
+    n, i = (0, 0);
+    return (n, i);
 
-def repl(prompt='lis.py> '):
-    "A prompt-read-eval-print loop."
-    while True:
-        val = eval(parse(raw_input(prompt)))
-        if val is not None: print to_string(val)
+def Compile(x, env=global_env):
+    "Evaluate an expression in an environment."
+    if isa(x, Symbol):             # variable reference
+        Print("  LD %s %s" % frame_lookup(x, env))
+    elif not isa(x, list):         # constant literal
+        Print("  LDC %d" %x)
+    elif x[0] == 'quote':          # (quote exp)
+        (_, exp) = x
+        return exp
+    elif x[0] == 'if':             # (if test conseq alt)
+        (_, test, conseq, alt) = x
+        Compile(test, env)
+        l1, l2 = ("label1", "label2")
+        Print("  SEL %s %s" %(l1, l2))
+        Print("label1:")
+        Compile(conseq, env)
+        Print("  JOIN")
+        Print("label2:")
+        Compile(alt, env)
+        Print("  JOIN")
+    elif x[0] == 'set!':           # (set! var exp)
+        (_, var, exp) = x
+        Compile(exp, env)
+        # TODO
+        n, i = (0, 0)
+        Print("  ST %s %s" %(n, i))
+    elif x[0] == 'define':         # (define var exp)
+        (_, var, exp) = x
+        #env[var] = Compile(exp, env) # TODO Not written in Perl
+    elif x[0] == 'lambda':         # (lambda (var*) exp)
+        (_, vars, exp) = x
+        return lambda *args: eval(exp, Env(vars, args, env))
+    elif x[0] == 'begin':          # (begin exp*)
+        for exp in x[1:]:
+            val = Compile(exp, env)
+        return val
+    elif x[0] in prim:
+        f = prim[x[0]]
+        for i in range(1, len(x)):
+            Compile(x[i], f)
+        Print("  %s" %f)
+    else:                          # (proc exp*)
+        exps = [Compile(exp, env) for exp in x]
+        Print("  %s" %env)
+        #proc = exps.pop(0) # TODO Compile prints, does not return!
+        #return proc(*exps)
 
 def main(prog, f=""):
-    if len(f):
-        tree = parse(open(f).read())
-        pprint.pprint(tree)
-        val = eval(tree)
-        if val is not None: print to_string(val)
+    if f:
+        code = open(f).read()
+        prog = parse(code)
     else:
-        repl()
+        prog = ['add', ['add', 1, 2], 3]
+    pprint.pprint(prog)
+    Compile(prog)
 
 main(*sys.argv)
