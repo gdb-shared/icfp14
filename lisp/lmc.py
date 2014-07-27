@@ -17,22 +17,7 @@ class Env(dict):
         "Find the innermost Env where var appears."
         return self if var in self else self.outer.find(var)
 
-def add_globals(env):
-    "Add some Scheme standard procedures to an environment."
-    import math, operator as op
-    return env
-    env.update(vars(math)) # sin, sqrt, ...
-    # TODO?
-    env.update(
-     {'+':op.add, '-':op.sub, '*':op.mul, '/':op.div, 'not':op.not_,
-      '>':op.gt, '<':op.lt, '>=':op.ge, '<=':op.le, '=':op.eq,
-      'equal?':op.eq, 'eq?':op.is_, 'length':len, 'cons':lambda x,y:[x]+y,
-      'car':lambda x:x[0],'cdr':lambda x:x[1:], 'append':op.add,
-      'list':lambda *x:list(x), 'list?': lambda x:isa(x,list),
-      'null?':lambda x:x==[], 'symbol?':lambda x: isa(x, Symbol)})
-    return env
-
-global_env = add_globals(Env())
+global_env = Env()
 
 isa = isinstance
 
@@ -107,52 +92,52 @@ def frame_lookup(name, f):
     n, i = (0, 0);
     return (n, i);
 
-def Compile(x, env=global_env):
+def Compile(x, env=global_env, b=global_blocks):
     "Evaluate an expression in an environment."
     if isa(x, Symbol):             # variable reference
-        Print("  LD %s %s" % frame_lookup(x, env))
+        return ["LD %d %d" % env.find(x)[x]]
     elif not isa(x, list):         # constant literal
-        Print("  LDC %d" %x)
+        return ["LDC %d" % x]
     elif x[0] == 'quote':          # (quote exp)
-        (_, exp) = x
-        return exp
+        raise RuntimeError("quote unimplmented")
     elif x[0] == 'if':             # (if test conseq alt)
         (_, test, conseq, alt) = x
-        Compile(test, env)
-        l1, l2 = ("label1", "label2")
-        Print("  SEL %s %s" %(l1, l2))
-        Print("label1:")
-        Compile(conseq, env)
-        Print("  JOIN")
-        Print("label2:")
-        Compile(alt, env)
-        Print("  JOIN")
+        code = compile(test)
+        l1 = b.Add(compile(conseq))
+        l2 = b.Add(compile(alt))
+        code.append("SEL %s %s" % (l1, l2))
+        return code
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
-        Compile(exp, env)
-        # TODO
-        n, i = (0, 0)
-        Print("  ST %s %s" %(n, i))
+        code = compile(exp)
+        code.append("ST %d %d" % env.find(var)[var])
+        return code
     elif x[0] == 'define':         # (define var exp)
         (_, var, exp) = x
-        #env[var] = Compile(exp, env) # TODO Not written in Perl
+        code = compile(exp)
+        code.append("ST %d %d" % frame_add(var, env))
+        return code
     elif x[0] == 'lambda':         # (lambda (var*) exp)
         (_, vars, exp) = x
-        return lambda *args: eval(exp, Env(vars, args, env))
+        #return lambda *args: eval(exp, Env(vars, args, env))
     elif x[0] == 'begin':          # (begin exp*)
+        code = []
         for exp in x[1:]:
-            val = Compile(exp, env)
-        return val
+            code.extend(Compile(exp, env))
+        return code
     elif x[0] in prim:
-        f = prim[x[0]]
-        for i in range(1, len(x)):
-            Compile(x[i], f)
-        Print("  %s" %f)
+        code = []
+        for exp in x[1:]:
+            code.extend(Compile(exp, env))
+        code.append(x[0])
+        return code
     else:                          # (proc exp*)
-        exps = [Compile(exp, env) for exp in x]
-        Print("  %s" %env)
-        #proc = exps.pop(0) # TODO Compile prints, does not return!
-        #return proc(*exps)
+        code = []
+        for exp in x[1:]:
+            code.extend(Compile(exp, env))
+        code.append("LD %d %d" % frame_lookup(x[0], env))
+        code.append("AP %d" % (len(x)-1))
+        return code
 
 def main(prog, f=""):
     if f:
