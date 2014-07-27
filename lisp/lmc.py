@@ -40,7 +40,8 @@ class Blocks(object):
             linenos[label] = len(lines)
             lines.extend(sub)
         Debug(pprint.pformat(linenos))
-        lines = [string.Template(line).substitute(linenos) for line in lines]
+        lines = [string.Template(line + "\t ; #%02d" %n).substitute(linenos)
+                for n, line in enumerate(lines)]
         for line in lines:
             f.write('  ' + line + '\n')
     def __init__(self):
