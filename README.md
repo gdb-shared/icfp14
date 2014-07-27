@@ -32,27 +32,46 @@ Lambda Man Quick Ref
     DBUG    - pop x. show x in debug window
     BRK     - breakpoint
 
+GCC
+---
+
+    MOV dest,src  - dest = src
+    INC dest      - ++dest
+    DEC dest      - --dest
+    ADD dest,src  - dest += src
+    SUB dest,src  - dest -= src
+    MUL dest,src  - dest *= src
+    DIV dest,src  - dest /= src
+    AND dest,src  - dest &= src
+    OR dest,src   - dest |= src
+    XOR dest,src  - dest ^= src
+    JLT targ,x,y  - if (x < y) goto targ
+    JEQ targ,x,y  - if (x == y) goto targ
+    JGT targ,x,y  - if (x > y) goto targ
+    INT i         - interrupt i
+    HLT           - halt
+
 fickle
 ------
 
-mov a,255
-mov b,0
-mov c,4
+    mov a,255
+    mov b,0
+    mov c,4
 
-dec c
-jgt 7,[c],a
+    dec c
+    jgt 7,[c],a
 
-mov a,[c]
-mov b,c
-jgt 3,c,0
+    mov a,[c]
+    mov b,c
+    jgt 3,c,0
 
-mov a,b
-int 0
+    mov a,b
+    int 0
 
-int 3
-int 6
-inc [b]
-hlt
+    int 3
+    int 6
+    inc [b]
+    hlt
 
 Ghost Language
 --------------
