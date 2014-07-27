@@ -32,7 +32,27 @@ Lambda Man Quick Ref
     DBUG    - pop x. show x in debug window
     BRK     - breakpoint
 
+fickle
+------
 
+mov a,255
+mov b,0
+mov c,4
+
+dec c
+jgt 7,[c],a
+
+mov a,[c]
+mov b,c
+jgt 3,c,0
+
+mov a,b
+int 0
+
+int 3
+int 6
+inc [b]
+hlt
 
 Ghost Language
 --------------

@@ -1,3 +1,4 @@
+#!/usr/bin/python
 ################ Lispy: Scheme Interpreter in Python
 
 ## (c) Peter Norvig, 2010; See http://norvig.com/lispy.html
@@ -5,6 +6,7 @@
 ################ Symbol, Env classes
 
 from __future__ import division
+import sys
 
 Symbol = str
 
@@ -112,4 +114,11 @@ def repl(prompt='lis.py> '):
         val = eval(parse(raw_input(prompt)))
         if val is not None: print to_string(val)
 
-repl()
+def main(prog, f=""):
+    if len(f):
+        val = eval(parse(open(f).read()))
+        if val is not None: print to_string(val)
+    else:
+        repl()
+
+main(*sys.argv)
