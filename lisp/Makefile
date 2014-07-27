@@ -5,3 +5,11 @@ pac:
 	./lma.pl pac.lma
 pb:
 	./lma.pl pac.lma | pbcopy
+suite:
+	./lmc.py simple.lisp
+	./lmc.py simple2.lisp
+	./lmc.py simple3.lisp
+	./lmc.py simple4.lisp
+	./lmc.py simple5.lisp
+	./lmc.py simple6.lisp
+	./lmc.py simple7.lisp
