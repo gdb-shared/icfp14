@@ -62,6 +62,9 @@ sub frame_lookup {
     return ($n, $i);
 }
 
+sub frame_add {
+}
+
 sub compile {
     my ($x, $f) = @_;
     if (not ref $x) {
@@ -82,6 +85,7 @@ sub compile {
         my ($n, $i) = (0, 0);
         print "  ST $n $i\n";
     } elsif ($x->[0] eq "define") {
+        frame_add($x->[1]);
     } elsif ($x->[0] eq "if") {
         compile($x->[1], $f);
         # TODO
