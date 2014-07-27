@@ -13,6 +13,12 @@ step:
   LD   0 0      ; var s
   LDC  1
   ADD
-  LD   1 0      ; var down
+  LD   0 0      ; var s
+  LD   0 0      ; var s
+  LDC  4
+  DIV
+  LDC  4
+  MUL
+  SUB
   CONS
   RTN           ; return (s+1, down)
