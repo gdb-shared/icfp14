@@ -20,8 +20,8 @@ class Env(dict):
 def add_globals(env):
     "Add some Scheme standard procedures to an environment."
     import math, operator as op
-    env.update(vars(math)) # sin, sqrt, ...
     return env
+    env.update(vars(math)) # sin, sqrt, ...
     # TODO?
     env.update(
      {'+':op.add, '-':op.sub, '*':op.mul, '/':op.div, 'not':op.not_,
