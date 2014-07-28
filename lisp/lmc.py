@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 from __future__ import print_function
 from __future__ import division
-import sys, pprint, string
+import sys, pprint, string, re
 
 def Print(s):
     print(s)
@@ -54,12 +54,17 @@ global_blocks = Blocks()
 def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
+
+re_comment = re.compile(r'\s*;.*$')
+re_paren = re.compile(r'([()])')
 def tokenize(s):
     """Convert a string into a list of tokens.
-    >>> tokenize('()')
-    ['(', ')']
+    >>> tokenize('(x) ; comment')
+    ['(', 'x', ')']
     """
-    return s.replace('(',' ( ').replace(')',' ) ').split()
+    s = re_comment.sub('', s)
+    s = re_paren.sub(r' \1 ', s)
+    return s.split()
 def read_from(tokens):
     "Read an expression from a sequence of tokens."
     if len(tokens) == 0:
