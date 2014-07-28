@@ -55,7 +55,7 @@ def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
 
-re_comment = re.compile(r'\s*;.*$')
+re_comment = re.compile(r'\s*;.*\n')
 re_paren = re.compile(r'([()])')
 def tokenize(s):
     """Convert a string into a list of tokens.
