@@ -5,7 +5,7 @@
   RAP  2        ; load declarations into environment and run init
   RTN           ; final return
 init:
-  LDC  42
+  LDC  401
   LD   0 1      ; var step
   CONS
   RTN           ; return (42, step)
@@ -14,10 +14,10 @@ step:
   LDC  1
   ADD
   LD   0 0      ; var s
-  LDC  8
+  LDC  16
   DIV
   LD   0 0      ; var s
-  LDC  32
+  LDC  64
   DIV
   LDC  4
   MUL

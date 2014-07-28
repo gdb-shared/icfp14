@@ -1,5 +1,8 @@
-lambdaman.gcc: 
+lambdaman.gcc: pac.lma lma.pl
 	./lma.pl pac.lma > $@
+
+solution: lambdaman.gcc
+	cp $< ../solution
 
 pac: syn
 	./lmc.py pac.lisp
