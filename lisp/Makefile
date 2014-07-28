@@ -15,7 +15,7 @@ suite:
 	./lmc.py simple6.lisp
 	./lmc.py simple7.lisp
 t:
-	py.test test_lmc.py
+	py.test -v --doctest-modules --ignore=keep/
 tall: suite t
 syn:
 	python -c "import lmc"

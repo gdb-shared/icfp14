@@ -55,7 +55,10 @@ def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
 def tokenize(s):
-    "Convert a string into a list of tokens."
+    """Convert a string into a list of tokens.
+    >>> tokenize('()')
+    ['(', ')']
+    """
     return s.replace('(',' ( ').replace(')',' ) ').split()
 def read_from(tokens):
     "Read an expression from a sequence of tokens."
