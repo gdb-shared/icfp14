@@ -165,7 +165,7 @@ def main(prog, f=""):
         prog = parse(code)
     else:
         prog = ['add', ['add', 1, 2], 3]
-    pprint.pprint(prog)
+    Debug(pprint.pformat(prog))
     global_blocks.AddMain(Compile(prog))
     global_blocks.Print()
 

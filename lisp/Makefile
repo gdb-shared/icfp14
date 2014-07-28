@@ -19,4 +19,7 @@ t:
 tall: suite t
 syn:
 	python -c "import lmc"
+good:
+	@cat boilerplate.lma
+	@./lmc.py pac.lisp
 .PHONY: t suite
