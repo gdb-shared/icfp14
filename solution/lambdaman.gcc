@@ -4,7 +4,7 @@
   LDF  6 ; >>---- init ---->>      ; init function
   RAP  2        ; load declarations into environment and run init
   RTN           ; final return
-  LDC  401 ; <<==== init ====<<
+  LDC  4101 ; <<==== init ====<<
   LD   0 1      ; var step
   CONS
   RTN           ; return (42, step)
