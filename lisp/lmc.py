@@ -121,7 +121,8 @@ def Compile(x, env=global_env, b=global_blocks):
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
         code = Compile(exp)
-        code.append("ST %d %d" % env.find(var)[var])
+        v = env.find(var)[var]
+        code.append("ST %d %d" % (v, 99999999))
         return code
     elif x[0] == 'define':         # (define var exp)
         (_, var, exp) = x
