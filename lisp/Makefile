@@ -1,8 +1,9 @@
+pac: syn
+	./lmc.py pac.lisp
+
 test: syn
 	./lmc.py simple7.lisp
 
-pac:
-	./lma.pl pac.lma
 pb:
 	./lma.pl pac.lma | pbcopy
 suite: 

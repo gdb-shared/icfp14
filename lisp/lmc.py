@@ -97,7 +97,8 @@ prim = {
 def Compile(x, env=global_env, b=global_blocks):
     "Evaluate an expression in an environment."
     if isa(x, Symbol):             # variable reference
-        return ["LD %d %d" % (0, env.find(x)[x])]
+        #return ["LD %d %d" % (0, env.find(x)[x])]
+        return ["LD %d %d" % (0, 0)]
     elif not isa(x, list):         # constant literal
         return ["LDC %d" % x]
     elif x[0] == 'quote':          # (quote exp)
@@ -118,11 +119,17 @@ def Compile(x, env=global_env, b=global_blocks):
         (_, var, exp) = x
         code = Compile(exp)
         env[var] = len(env)
-        code.append("ST %d %d" % env[var])
+        code.append("ST %d %d" % (0, env[var]))
         return code
     elif x[0] == 'lambda':         # (lambda (var*) exp)
         (_, vars, exp) = x
         #return lambda *args: eval(exp, Env(vars, args, env))
+        l = b.Add(Compile(exp, Env(vars, range(0, len(vars)), env)))
+        code.append("LDC %s" % l)
+        slot = len(env)
+        env["anon%d" % slot] = slot
+        code.append("ST %d %d" % (0, slot))
+        return code
     elif x[0] == 'begin':          # (begin exp*)
         code = []
         for exp in x[1:]:
@@ -138,7 +145,8 @@ def Compile(x, env=global_env, b=global_blocks):
         code = []
         for exp in x[1:]:
             code.extend(Compile(exp, env))
-        code.append("LDF %d %d" % (0, env.find(x)[x]))
+        proc = x[0]
+        code.append("LDF %d %d" % (0, env.find(proc)[proc]))
         code.append("AP %d" % (len(x)-1))
         return code
 
