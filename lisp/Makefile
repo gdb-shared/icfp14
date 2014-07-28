@@ -14,6 +14,7 @@ suite:
 	./lmc.py simple5.lisp
 	./lmc.py simple6.lisp
 	./lmc.py simple7.lisp
+	./lmc.py simple8.lisp
 t:
 	py.test -v --doctest-modules --ignore=keep/
 tall: suite t
