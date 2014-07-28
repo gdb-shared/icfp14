@@ -25,18 +25,6 @@ isa = isinstance
 
 def Debug(s):
     sys.stderr.write(s + '\n')
-boilerplate = """\
-  DUM  2        ; 2 top-level declarations
-  LDC  2        ; declare constant down
-  LDF  10 ; >>---- step ---->>      ; declare function step
-  LDF  6 ; >>---- init ---->>      ; init function
-  RAP  2        ; load declarations into environment and run init
-  RTN           ; final return
-  LDC  42 ; <<==== init ====<<
-  LD   0 1      ; var step
-  CONS
-  RTN           ; return (42, step)
-"""
 def SafeLines(lines):
     return [line for line in lines
             if StripComments(line)]
@@ -45,10 +33,7 @@ class Blocks(object):
         label = 'LABEL%02d' %len(self.subs)
         self.subs[label] = SafeLines(sub)
         return "${%s}" %label
-    def AddMain(self, main=None):
-        if main is None:
-            main = [line for line in
-                    StripComments(boilerplate).split('\n')]
+    def AddMain(self, main):
         self.main = SafeLines(main)
     def Print(self, f=sys.stdout, with_linenos=True):
         linenos = dict()
@@ -183,6 +168,23 @@ def Compile(x, env=global_env, b=global_blocks):
         code.append("AP %d" % (len(x)-1))
         return code
 
+def boilerplate(step, b=global_blocks):
+    code = []
+    code.append("LDC 42")
+    code.append("LD 0 1")
+    code.append("CONS")
+    code.append("RTN")
+    init = b.Add(code)
+
+    code = []
+    code.append("DUM 2")
+    code.append("LDC 2")
+    code.append("LDF %s" % step)
+    code.append("LDF %s" % init)
+    code.append("RAP 2")
+    code.append("RTN")
+    b.AddMain(code)
+
 def main(prog, f=""):
     if f:
         code = open(f).read()
@@ -190,10 +192,10 @@ def main(prog, f=""):
     else:
         prog = ['add', ['add', 1, 2], 3]
     Debug(pprint.pformat(prog))
-    global_blocks.AddMain() # default boilerplate
     code = Compile(prog)
     code.append("RTN")
-    global_blocks.Add(code)
+    step = global_blocks.Add(code)
+    boilerplate(step)
     global_blocks.Print()
 
 if __name__=="__main__":
