@@ -157,13 +157,11 @@ def Compile(x, env=global_env, b=global_blocks):
         return code
     elif x[0] == 'lambda':         # (lambda (var*) exp)
         (_, vars, exp) = x
-        #return lambda *args: eval(exp, Env(vars, args, env))
-        l = b.Add(Compile(exp, Env(vars, range(0, len(vars)), env)))
+        block = Compile(exp, Env(vars, range(0, len(vars)), env))
+        block.append("RTN")
+        l = b.Add(block)
         code = []
-        code.append("LDC %s" % l)
-        slot = len(env)
-        env["anon%d" % slot] = slot
-        code.append("ST %d %d" % (0, slot))
+        code.append("LDF %s" % l)
         return code
     elif x[0] == 'begin':          # (begin exp*)
         code = []
@@ -181,7 +179,7 @@ def Compile(x, env=global_env, b=global_blocks):
         for exp in x[1:]:
             code.extend(Compile(exp, env))
         proc = x[0]
-        code.append("LDF %d %d" % (0, env.find(proc)[proc]))
+        code.append("LDC %d %d" % (0, env.find(proc)[proc]))
         code.append("AP %d" % (len(x)-1))
         return code
 
