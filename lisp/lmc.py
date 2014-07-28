@@ -13,9 +13,15 @@ class Env(dict):
     def __init__(self, parms=(), args=(), outer=None):
         self.update(zip(parms,args))
         self.outer = outer
-    def find(self, var):
+    def find(self, var, n=0):
         "Find the innermost Env where var appears."
-        return self if var in self else self.outer.find(var)
+        pprint.pprint([var, n, self])
+        if var in self:
+            return (n, self[var])
+        elif self.outer:
+            return self.outer.find(var, n+1)
+        else:
+            raise RuntimeError("Variable not defined: %s" % var)
 
 global_env = Env()
 
@@ -115,28 +121,26 @@ prim = {
 def Compile(x, env=global_env, b=global_blocks):
     "Evaluate an expression in an environment."
     if isa(x, Symbol):             # variable reference
-        #return ["LD %d %d" % (0, env.find(x)[x])]
-        return ["LD %d %d" % (0, 0)]
+        return ["LD %d %d" % env.find(x)]
     elif not isa(x, list):         # constant literal
         return ["LDC %d" % x]
     elif x[0] == 'quote':          # (quote exp)
         raise RuntimeError("quote unimplmented")
     elif x[0] == 'if':             # (if test conseq alt)
         (_, test, conseq, alt) = x
-        code = Compile(test)
-        l1 = b.Add(Compile(conseq) + ["JOIN"])
-        l2 = b.Add(Compile(alt) + ["JOIN"])
+        code = Compile(test, env)
+        l1 = b.Add(Compile(conseq, env) + ["JOIN"])
+        l2 = b.Add(Compile(alt, env) + ["JOIN"])
         code.append("SEL %s %s" % (l1, l2))
         return code
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
-        code = Compile(exp)
-        v = env.find(var)[var]
-        code.append("ST %d %d" % (0, v))
+        code = Compile(exp, env)
+        code.append("ST %d %d" % env.find(var))
         return code
     elif x[0] == 'define':         # (define var exp)
         (_, var, exp) = x
-        code = Compile(exp)
+        code = Compile(exp, env)
         env[var] = len(env)
         code.append("ST %d %d" % (0, env[var]))
         return code
@@ -147,6 +151,13 @@ def Compile(x, env=global_env, b=global_blocks):
         l = b.Add(block)
         code = []
         code.append("LDF %s" % l)
+        return code
+    elif x[0] == 'main':         # (lambda (var*) exp)
+        (_, vars, exp) = x
+        for var in vars:
+            env[var] = len(env)
+        code = Compile(exp, env)
+        code.append("RTN")
         return code
     elif x[0] == 'begin':          # (begin exp*)
         code = []
@@ -164,8 +175,9 @@ def Compile(x, env=global_env, b=global_blocks):
         for exp in x[1:]:
             code.extend(Compile(exp, env))
         proc = x[0]
-        code.append("LDC %d %d" % (0, env.find(proc)[proc]))
-        code.append("AP %d" % (len(x)-1))
+        count = len(x)-1
+        code.append("LD %d %d" % env.find(proc))
+        code.append("AP %d" % count)
         return code
 
 def boilerplate(step, b=global_blocks):
@@ -193,9 +205,7 @@ def main(prog, f=""):
         prog = ['add', ['add', 1, 2], 3]
     Debug(pprint.pformat(prog))
     code = Compile(prog)
-    code.append("RTN")
-    step = global_blocks.Add(code)
-    boilerplate(step)
+    global_blocks.AddMain(code)
     global_blocks.Print()
 
 if __name__=="__main__":

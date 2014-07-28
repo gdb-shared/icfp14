@@ -1,3 +1,6 @@
+lambdaman.gcc: 
+	./lma.pl pac.lma > $@
+
 pac: syn
 	./lmc.py pac.lisp
 
@@ -15,6 +18,7 @@ suite:
 	./lmc.py simple6.lisp
 	./lmc.py simple7.lisp
 	./lmc.py simple8.lisp
+	./lmc.py pac.lisp
 t:
 	py.test -v --doctest-modules --ignore=keep/
 tall: suite t
