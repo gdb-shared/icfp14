@@ -1,0 +1,109 @@
+ruby1.9 -w grub.rb < hunt.rb
+; func 'main'
+INC [246]           	 ;line 0
+INT 3               	 ;line 1
+INT 6               	 ;line 2
+MOV [248],a         	 ;line 3
+MOV [247],b         	 ;line 4
+INT 3               	 ;line 5
+INT 5               	 ;line 6
+MOV [254],a         	 ;line 7
+MOV [255],b         	 ;line 8
+INT 1               	 ;line 9
+MOV [252],a         	 ;line 10
+MOV [253],b         	 ;line 11
+INT 3               	 ;line 12
+AND a,1             	 ;line 13
+JEQ 28,a,0	 ;line 14
+; func 'hunt_vert'
+JLT 24,[254],[252]	 ;line 15
+JLT 20,[255],[253]	 ;line 16
+JGT 22,[255],[253]	 ;line 17
+; 'GO_LEFT'
+MOV [251],3         	 ;line 18
+jeq 40,0,0 ; goto 'FINISH'	 ;line 19
+; 'GO_DOWN'
+MOV [251],2         	 ;line 20
+jeq 40,0,0 ; goto 'FINISH'	 ;line 21
+; 'GO_UP'
+MOV [251],0         	 ;line 22
+jeq 40,0,0 ; goto 'FINISH'	 ;line 23
+; 'RIGHT'
+JLT 20,[255],[253]	 ;line 24
+JGT 22,[255],[253]	 ;line 25
+; 'GO_RIGHT'
+MOV [251],1         	 ;line 26
+jeq 40,0,0 ; goto 'FINISH'	 ;line 27
+; func 'hunt_horz'
+JLT 37,[254],[252]	 ;line 28
+JLT 33,[255],[253]	 ;line 29
+JGT 35,[255],[253]	 ;line 30
+; 'HGO_UP'
+MOV [251],3         	 ;line 31
+jeq 40,0,0 ; goto 'FINISH'	 ;line 32
+; 'HGO_RIGHT'
+MOV [251],2         	 ;line 33
+jeq 40,0,0 ; goto 'FINISH'	 ;line 34
+; 'HGO_LEFT'
+MOV [251],0         	 ;line 35
+jeq 40,0,0 ; goto 'FINISH'	 ;line 36
+; 'HDOWN'
+JLT 33,[255],[253]	 ;line 37
+JGT 35,[255],[253]	 ;line 38
+; 'HGO_UP'
+MOV [251],1         	 ;line 39
+; func 'FINISH'
+JEQ 85,[248],1	 ;line 40
+ADD [250],[246]     	 ;line 41
+ADD [250],[252]     	 ;line 42
+ADD [250],[252]     	 ;line 43
+MOV a,0             	 ;line 44
+INT 5               	 ;line 45
+ADD [250],a         	 ;line 46
+ADD [250],b         	 ;line 47
+MOV a,1             	 ;line 48
+INT 5               	 ;line 49
+ADD [250],a         	 ;line 50
+ADD [250],b         	 ;line 51
+MOV a,2             	 ;line 52
+INT 5               	 ;line 53
+ADD [250],a         	 ;line 54
+ADD [250],b         	 ;line 55
+MOV g,[244]         	 ;line 56
+MOV h,[245]         	 ;line 57
+INT 8               	 ;line 58
+JGT 80,[244],0	 ;line 59
+MOV c,[250]         	 ;line 60
+DIV c,3             	 ;line 61
+MUL c,3             	 ;line 62
+MOV d,[250]         	 ;line 63
+SUB d,c             	 ;line 64
+INT 3               	 ;line 65
+ADD d,a             	 ;line 66
+ADD d,1             	 ;line 67
+MOV a,3             	 ;line 68
+INT 5               	 ;line 69
+ADD [250],a         	 ;line 70
+ADD [250],b         	 ;line 71
+MOV c,[250]         	 ;line 72
+DIV c,d             	 ;line 73
+MUL c,d             	 ;line 74
+MOV e,[250]         	 ;line 75
+SUB e,c             	 ;line 76
+MOV [244],e         	 ;line 77
+XOR [245],1         	 ;line 78
+INC [244]           	 ;line 79
+; 'DEC_MODE_COUNTER'
+DEC [244]           	 ;line 80
+JEQ 86,[245],0	 ;line 81
+; 'RANDOM_MOVE'
+MOV [251],[250]     	 ;line 82
+AND [251],3         	 ;line 83
+jeq 86,0,0 ; goto 'SET_DIR'	 ;line 84
+; 'REVERSE'
+ADD [251],2         	 ;line 85
+; 'SET_DIR'
+MOV a,[251]         	 ;line 86
+INT 0               	 ;line 87
+MOV c,[250]         	 ;line 88
+HLT                 	 ;line 89

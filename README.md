@@ -1,6 +1,13 @@
 ICFP 2014
 =========
 
+To run
+------
+```
+make -C lisp > solution/lambdaman.gcc
+make -C hunt > solution/ghost0.ghc
+```
+
 Lambda Man Quick Ref
 --------------------
 
