@@ -25,13 +25,31 @@ isa = isinstance
 
 def Debug(s):
     sys.stderr.write(s + '\n')
+boilerplate = """\
+  DUM  2        ; 2 top-level declarations
+  LDC  2        ; declare constant down
+  LDF  10 ; >>---- step ---->>      ; declare function step
+  LDF  6 ; >>---- init ---->>      ; init function
+  RAP  2        ; load declarations into environment and run init
+  RTN           ; final return
+  LDC  42 ; <<==== init ====<<
+  LD   0 1      ; var step
+  CONS
+  RTN           ; return (42, step)
+"""
+def SafeLines(lines):
+    return [line for line in lines
+            if StripComments(line)]
 class Blocks(object):
     def Add(self, sub):
         label = 'LABEL%02d' %len(self.subs)
-        self.subs[label] = sub
+        self.subs[label] = SafeLines(sub)
         return "${%s}" %label
-    def AddMain(self, sub):
-        self.main = sub
+    def AddMain(self, main=None):
+        if main is None:
+            main = [line for line in
+                    StripComments(boilerplate).split('\n')]
+        self.main = SafeLines(main)
     def Print(self, f=sys.stdout, with_linenos=True):
         linenos = dict()
         lines = list()
@@ -50,19 +68,26 @@ class Blocks(object):
             f.write('  ' + line + '\n')
     def __init__(self):
         self.subs = dict()
+
 global_blocks = Blocks()
 def parse(s):
     "Read a Scheme expression from a string."
     return read_from(tokenize(s))
 
 re_comment = re.compile(r'\s*;.*$', re.MULTILINE)
+def StripComments(s):
+    """
+    >>> StripComments('abc ; comment\\n; another\\nfoo')
+    'abc\\nfoo'
+    """
+    return re_comment.sub('', s)
 re_paren = re.compile(r'([()])')
 def tokenize(s):
     """Convert a string into a list of tokens.
     >>> tokenize('(x) ; comment\\n; another\\nfoo')
     ['(', 'x', ')', 'foo']
     """
-    s = re_comment.sub('', s)
+    s = StripComments(s)
     s = re_paren.sub(r' \1 ', s)
     return s.split()
 def read_from(tokens):
@@ -167,9 +192,10 @@ def main(prog, f=""):
     else:
         prog = ['add', ['add', 1, 2], 3]
     Debug(pprint.pformat(prog))
+    global_blocks.AddMain() # default boilerplate
     code = Compile(prog)
     code.append("RTN")
-    global_blocks.AddMain(code)
+    global_blocks.Add(code)
     global_blocks.Print()
 
 if __name__=="__main__":
