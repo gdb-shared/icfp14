@@ -114,15 +114,15 @@ def Compile(x, env=global_env, b=global_blocks):
     elif x[0] == 'if':             # (if test conseq alt)
         (_, test, conseq, alt) = x
         code = Compile(test)
-        l1 = b.Add(Compile(conseq) + ["RTN"])
-        l2 = b.Add(Compile(alt) + ["RTN"])
+        l1 = b.Add(Compile(conseq) + ["JOIN"])
+        l2 = b.Add(Compile(alt) + ["JOIN"])
         code.append("SEL %s %s" % (l1, l2))
         return code
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
         code = Compile(exp)
         v = env.find(var)[var]
-        code.append("ST %d %d" % (v, 99999999))
+        code.append("ST %d %d" % (0, v))
         return code
     elif x[0] == 'define':         # (define var exp)
         (_, var, exp) = x
