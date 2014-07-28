@@ -134,6 +134,7 @@ def Compile(x, env=global_env, b=global_blocks):
         (_, vars, exp) = x
         #return lambda *args: eval(exp, Env(vars, args, env))
         l = b.Add(Compile(exp, Env(vars, range(0, len(vars)), env)))
+        code = []
         code.append("LDC %s" % l)
         slot = len(env)
         env["anon%d" % slot] = slot
@@ -166,7 +167,9 @@ def main(prog, f=""):
     else:
         prog = ['add', ['add', 1, 2], 3]
     Debug(pprint.pformat(prog))
-    global_blocks.AddMain(Compile(prog))
+    code = Compile(prog)
+    code.append("RTN")
+    global_blocks.AddMain(code)
     global_blocks.Print()
 
 if __name__=="__main__":
